@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JARVIS</title>
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background-color: #1abc9c;
+            color: white;
+            position: relative;
+        }
+
+        .speech-indicator {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+        }
+
+        .pulse-animation {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .speak-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background-color 0.3s, transform 0.3s;
+            margin-top: 20px;
+        }
+
+        .speak-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .ai-assistant {
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f7f9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">JARVIS</div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button>Sign Up</button>
+            <button>Log In</button>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Welcome to JARVIS</h1>
+            <p>Your gateway to cutting-edge AI technology. Experience the future with us.</p>
+            <button>Get Started</button>
+            <button>Learn More</button>
+        </section>
+        <section class="ai-assistant">
+            <div class="speech-indicator" id="speechIndicator"></div>
+            <h2>JARVIS</h2>
+            <button class="speak-button" onclick="startRecognition()">Speak</button>
+            <div id="ai_response" class="response-box"></div>
+        </section>
+        <section id="features" class="features">
+            <h2>Features</h2>
+            <div class="feature-block">
+                <h3>Smart Analysis</h3>
+                <p>Leverage our AI for in-depth data analysis and insights.</p>
+            </div>
+            <div class="feature-block">
+                <h3>Automated Tasks</h3>
+                <p>Automate routine tasks and boost your productivity.</p>
+            </div>
+            <div class="feature-block">
+                <h3>Real-Time Reporting</h3>
+                <p>Get real-time updates and reports on your data.</p>
+            </div>
+        </section>
+        <section id="pricing" class="pricing">
+            <h2>Pricing Plans</h2>
+            <div class="pricing-table">
+                <h3>Basic</h3>
+                <p>$10/month</p>
+                <p>Essential AI tools</p>
+                <button>Sign Up</button>
+            </div>
+            <div class="pricing-table">
+                <h3>Standard</h3>
+                <p>$30/month</p>
+                <p>Advanced AI features</p>
+                <button>Sign Up</button>
+            </div>
+            <div class="pricing-table">
+                <h3>Premium</h3>
+                <p>$50/month</p>
+                <p>All-inclusive AI tools</p>
+                <button>Sign Up</button>
+            </div>
+        </section>
+        <section id="about" class="about">
+            <h2>About Us</h2>
+            <p>AI Unraveled is a platform offering advanced AI tools for data analysis and automation. Our mission is to provide cutting-edge AI solutions to help businesses and individuals make better decisions, automate tasks, and gain valuable insights from their data.</p>
+        </section>
+        <section id="contact" class="contact">
+            <h2>Contact Us</h2>
+            <p>If you have any questions or need further information, feel free to reach out to us.</p>
+            <p>Email: contact@aiunraveled.com</p>
+            <p>Phone: (123) 456-7890</p>
+            <p>Address: 123 AI Street, Tech City</p>
+        </section>
+    </main>
+    <footer>
+        <div class="quick-links">
+            <a href="#">Home</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#about">About Us</a>
+            <a href="#contact">Contact Us</a>
+        </div>
+        <div class="social-media">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
+        </div>
+        <div class="contact-info">
+            <p>Email: contact@aiunraveled.com</p>
+            <p>Phone: (123) 456-7890</p>
+            <p>Address: 123 AI Street, Tech City</p>
+        </div>
+        <div class="newsletter">
+            <input type="email" placeholder="Subscribe to our newsletter">
+            <button>Subscribe</button>
+        </div>
+    </footer>
+    <script src="/static/func.js"></script>
+    <script>
+        var voices = [];
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+        }
+
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        function askAI(user_input) {
+            console.log("Sending user input: " + user_input);
+            $.post('/ask', {user_input: user_input}, function(data) {
+                console.log("Received response: " + data.response);
+                $('#ai_response').html('<p>' + data.response + '</p>');
+                speak(data.response);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.log("Request failed: " + textStatus + ", " + errorThrown);
+                $('#ai_response').html('<p>Failed to get a response. Please try again later.</p>');
+            });
+        }
+
+        function speak(text) {
+            var speechIndicator = document.getElementById('speechIndicator');
+            speechIndicator.classList.add('pulse-animation');
+
+            var msg = new SpeechSynthesisUtterance(text);
+
+            // Choose a specific voice from the available voices
+            var chosenVoice = voices.find(voice => voice.name === "Google UK English Male") || voices.find(voice => voice.lang === "en-GB") || voices[0];
+            msg.voice = chosenVoice;
+
+            msg.onend = function(e) {
+                speechIndicator.classList.remove('pulse-animation');
+            };
+
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startRecognition() {
+            var recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = function(event) {
+                var speechResult = event.results[0][0].transcript;
+                console.log('Speech received: ' + speechResult);
+                askAI(speechResult);
+            };
+
+            recognition.onerror = function(event) {
+                console.log('Error occurred in recognition: ' + event.error);
+            };
+
+            recognition.onspeechend = function() {
+                recognition.stop();
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
